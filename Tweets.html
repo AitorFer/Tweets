@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <style>
+
+    #login{
+      text-align: center;
+    }
+    #registro{
+      text-align: center;
+      display: none;
+    }
+    #signup{
+      border-radius: 40px;
+    }
+    #mensajes{
+      text-align: center;
+    }
+    </style>
+  <div id='login'>
+    <i class="fas fa-user x4"></i>
+    <h3 id='LOGIN'>LOGIN</h3>
+    <input id='user' type="text" method='post' placeholder="Username" value='aitor'>
+    <input id='pass' type="password" method='post' placeholder="Password" value='1234'>
+    <button id='sesion' type='submit'>Sign in</button>
+    <br>
+    <br>
+    <a id='crear' href='#'>Crear cuenta</a>
+  </div>
+<hr>
+  <div id='registro'>
+    <h4>Username</h4>
+    <input id='username' type="text" method='post' placeholder="Username"><br><br>
+    <h4>Password</h4>
+    <input id='password' type="password" method='post' placeholder="Password"><br><br>
+    <h4>Tu foto de perfil(url)</h4>
+    <input id='imagen' type="text"><br><br>
+    <button id='signup'>Sign Up</button>
+  </div>
+  <div id='mensajes' style='display:none'>
+    <h3>Publica tu tweet</h3>
+    <input type='text' id='tweet'>
+    <button id='publicar'>Publicar</button>
+
+  </div>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js'></script>
+    <script type="text/javascript">
+//login correcto o incorrecto
+
+
+    function iniciarSesion(){
+      $('button#sesion').click(function(){
+
+        var user=$('input#user').val();
+        var pass=$('input#pass').val();
+
+
+
+        var peticion = {url:"http://192.168.100.43:1337/login",
+                     type:'POST',
+                    data:{username:user, password:pass}
+                  };
+            $.ajax(peticion).done(iniciarAplicacion)
+            .fail(function(){
+
+              alert('Login incorrecto')
+          });
+              });
+
+
+  }
+ //signUP inputs POST
+function crearUsuario(){
+    $(document).on('click',"button#signup",function(){
+
+      var username=$('input#username').val();
+      var password=$('input#password').val();
+      var fotoSign=$('input#imagen').val();
+
+      var peticion = {url:"http://192.168.100.43:1337/usuario",
+                    type:'POST',
+                    data:{username:username,
+                          password:password,
+                          imagen:fotoSign,
+                      }
+                };
+          $.ajax(peticion).done()
+          .fail(function(){
+
+            alert('No has podido registrarse')
+        });
+        });
+      }
+
+
+                        //boton crear cuenta
+  $('a#crear').click(function(){
+      $('div#registro').css('display','block');
+  });
+                    //funcionIniciarAplicacion
+  function iniciarAplicacion(usuario){
+        console.log(usuario);
+
+
+        $('div#login').hide();
+        $('div#registro').hide();
+        $('div#mensajes').show();
+
+$.ajax({url:"http://192.168.100.43:1337/tweets",
+        type:'GET',
+
+}).done(function(tweets){
+
+    console.log(tweets);
+    tweets.forEach(function(tweet){
+      $('div#mensajes').append('<div data-id="' + tweet.id + '"><br><br>'+'<h2>'+ tweet.creador.username +'</h2>'+'<img src="'+tweet.creador.imagen+'" width=100 height=100>'+ '<h4>' + tweet.mensaje + '</h4>'+'<button class="like"><i class="fas fa-thumbs-up"></i></button>'+'<h4>' + tweet.likes.length +'</h4></div>')
+
+//publicar tweet
+
+    });
+})
+.fail(function(){
+
+
+});
+//publicar nuestro tweet
+
+  $('button#publicar').click(function(){
+    var inputPublicar=$('input#tweet').val();
+  //posteamos al servidor nuestro tweet
+  $.ajax({url:"http://192.168.100.43:1337/tweet",
+          type:'POST',
+          data:{usuario:usuario.id,
+                mensaje: inputPublicar}
+
+
+  }).done(function(tweet){
+    var append=$('div#mensajes').append('<div data-id="' + tweet.id + '"><br><br>'+'<h2>'+ usuario.username +'</h2>'+'<img src="'+usuario.imagen+'" width=100 height=100>'+ '<h4>' + inputPublicar + '</h4>'+'<button class="like"><i class="fas fa-thumbs-up"></i></button>'+'<h4>' + usuario.likes+'</h4></div>')
+
+  $('div#mensajes').append(append);
+
+});
+});
+  //dando un like
+  $(document).on('click',"button.like",function(event){
+                  console.log('likeeeee');
+          var idTweet=$(event.currentTarget).parent().data('id');
+                  console.log('id!', idTweet);
+
+
+          $.ajax({ url:'http://192.168.100.43:1337/like/'+ idTweet,
+                  type:'PUT',
+                  data:{usuario:usuario.id}
+            }).done(function(likes){
+                          console.log(likes);
+
+        });
+
+
+
+
+  });
+  //dando dislike
+
+  }
+
+  iniciarSesion();
+  crearUsuario();
+    </script>
+  </body>
+</html>

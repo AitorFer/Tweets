@@ -22,8 +22,15 @@
       text-align: center;
     }
     #mensajes{
-      margin-left: 220px;
+      margin-left: 260px;
     }
+    #titulo{
+      font-style: italic;
+    }
+    .like, .dislike{
+      color:red;
+    }
+
 
 
     </style>
@@ -40,24 +47,19 @@
 <hr>
   <div id='registro'>
     <h4>Username</h4>
-    <input id='username' type="text" method='post' placeholder="Username"><br>
-    <small class="form-text text-muted">Specify a username to create an account</small>
-    <br>
+    <input id='username' type="text" method='post' placeholder="Username"><br><br>
     <h4>Password</h4>
-    <input id='password' type="password" method='post' placeholder="Password"><br>
-    <small class="form-text text-muted">Create you own password</small>
-    <br>
+    <input id='password' type="password" method='post' placeholder="Password"><br><br>
     <h4>Tu foto de perfil(url)</h4>
-    <input id='imagen' type="text"><br>
-    <small class="form-text text-muted">Put one url image to have a profile image</small>
-    <br>
-    <button id='signup' class="btn btn-primary">Sign Up</button>
+    <input id='imagen' type="text"><br><br>
+    <button id='signup'>Sign Up</button>
   </div>
   <div id='app'  style='display:none'>
-    <h3>Publica tu tweet</h3>
-    <input type='text' id='tweet'> 
-    <button type="button" class="btn btn-outline-primary" id='publicar'>Publicar</button>
-    <div id='mensajes'>
+    <h3 id='titulo'>Publica tu tweet</h3>
+    <textarea id='tweet' placeholder="Escribir mensaje" maxlength='140' rows='2' cols="50"></textarea><h6 id='caracteres'><span id='contador'>0</span></h6>
+    <button type="button" class="btn btn-secondary btn-sm" id='publicar'>Publicar</button>
+
+    <div id='mensajes' class='row'>
 
 
     </div>
@@ -80,7 +82,7 @@
 
 
 
-        var peticion = {url:"http://192.168.100.65:1337/login",
+        var peticion = {url:"http://192.168.100.31:1337/login",
                      type:'POST',
                     data:{username:user, password:pass}
                   };
@@ -101,7 +103,7 @@ function crearUsuario(){
       var password=$('input#password').val();
       var fotoSign=$('input#imagen').val();
 
-      var peticion = {url:"http://192.168.100.65:1337/usuario",
+      var peticion = {url:"http://192.168.100.31:1337/usuario",
                     type:'POST',
                     data:{username:username,
                           password:password,
@@ -130,14 +132,20 @@ function crearUsuario(){
         $('div#registro').hide();
         $('div#app').show();
 
-$.ajax({url:"http://192.168.100.65:1337/tweets",
+$.ajax({url:"http://192.168.100.31:1337/tweets",
         type:'GET',
 
 }).done(function(tweets){
 
     console.log(tweets);
     tweets.forEach(function(tweet){
-      $('div#mensajes').append('<div class="card w-75" data-id="' + tweet.id + '"><br><br><hr>'+'<h2>'+ tweet.creador.username +'</h2>'+'<img src="'+tweet.creador.imagen+'" width=100 height=100>'+ '<h4>' + tweet.mensaje + '</h4>'+'<button type="button" class="btn btn-outline-danger" id="like"><i class="far fa-heart"></i></button>'+'<h4>' + tweet.likes.length +'</h4></div>')
+      var clase = 'like far';
+      tweet.likes.forEach(function(usuarioLike){
+        if (usuarioLike.id === usuario.id) {
+          clase = 'dislike fas';
+        }
+      })
+      $('div#mensajes').append('<div class="card w-75" data-id="' + tweet.id + '"><br><br><hr>'+'<h5 style="margin-right:750px">'+ tweet.creador.username +'</h5>'+'<img src="'+tweet.creador.imagen+'" width=100 height=100>'+ '<h4>' + tweet.mensaje + '</h4>'+'<br><br><i class=" fa-heart ' + clase + '"></i><h4><span>' + tweet.likes.length+'</span> '+'likes</h4></div>')
 
 //publicar tweet
 
@@ -147,12 +155,32 @@ $.ajax({url:"http://192.168.100.65:1337/tweets",
 
 
 });
-                  //publicar nuestro tweet
+        // textarea caracteres(tweet)
+
+    $('textarea#tweet').on('input',function(){
+        var caracteres=$('textarea#tweet').val();
+        var total=caracteres.length;
+
+      if(caracteres.length < 140){
+
+        $('span#contador').css('color','green');
+            console.log($('textarea#tweet').val());
+            console.log(total);
+      }else{
+            $('span#contador').css('color','red');
+
+      }
+          $('span#contador').text(total);
+    })
+            //publicar nuestro tweet
 
   $('button#publicar').click(function(){
-    var inputPublicar=$('input#tweet').val();
+    var inputPublicar=$('textarea#tweet').val().trim();
+
               //posteamos al servidor nuestro tweet
-  $.ajax({url:"http://192.168.100.65:1337/tweet",
+
+
+  $.ajax({url:"http://192.168.100.31:1337/tweet",
           type:'POST',
           data:{usuario:usuario.id,
                 mensaje: inputPublicar}
@@ -160,34 +188,68 @@ $.ajax({url:"http://192.168.100.65:1337/tweets",
 
   }).done(function(tweet){
 
-      $('div#mensajes').prepend('<div class="card w-75" data-id="' + tweet.id + '"><br><br>'+'<h2 class="card-title">'+ usuario.username +'</h2>'+'<img src="'+usuario.imagen+'" width=100 height=100>'+ '<h4 class="card-text">' + inputPublicar + '</h4>'+'<button type="button" class="btn btn-outline-danger" id="like"><i class="far fa-heart"></i></i></button>'+'<button class="dislike"><i class="fas fa-thumbs-down"></i></button>'+'<h4>' + 0 +'</h4></div>')
 
+      $('div#mensajes').prepend('<div class="card w-75" data-id="' + tweet.id + '"><br><br>'+'<h5 class="card-title">'+ usuario.username +'</h5>'+'<img src="'+usuario.imagen+'" width=50 height=50>'+ '<h4 class="card-text">' + inputPublicar + '</h4>'+'<i class="far fa-heart like"></i>'+'<h4 class="contador">' + 0 +'</h4></div>')
+    });
 
-
- });
 });
+
                         //dando un like
-  $(document).on('click',"button#like",function(event){
+
+
+  $(document).on('click',"i.like",function(event){
+
+      var botonLike=$(event.currentTarget);
+      botonLike.addClass('fas').css('color','red')
+
                   console.log('likeeeee');
           var idTweet=$(event.currentTarget).parent().data('id');
                   console.log('id!', idTweet);
 
 
-          $.ajax({ url:'http://192.168.100.65:1337/like/'+ idTweet,
+          $.ajax({ url:'http://192.168.100.31:1337/like/'+ idTweet,
                   type:'PUT',
                   data:{usuario:usuario.id}
-            }).done(function(likes){
-                 var like=$(event.currentTarget).siblings().parseInt(h4.text());
+            }).done(function(){
+                        //contador likes sumar
 
+            var likes = parseInt(botonLike.next().children('span').text()) + 1;
+            botonLike.next().children('span').text(likes);
+            botonLike.removeClass('like').addClass('dislike');
                             console.log(likes);
         });
 
   });
                         //dando dislike
 
+        $(document).on('click',"i.dislike",function(event){
+
+          var botonLike=$(event.currentTarget);
+          botonLike.removeClass('fas').addClass('far')
+
+
+                          console.log('dislikeeeee');
+                    var idTweet=$(event.currentTarget).parent().data('id');
+                          console.log('id!', idTweet);
+
+
+            $.ajax({ url:'http://192.168.100.31:1337/dislike/'+ idTweet,
+                    type:'PUT',
+                    data:{usuario:usuario.id}
+              }).done(function(dislike){
+                    //contador likes restar (dislike)
+                    var likes = parseInt(botonLike.next().children('span').text());
+                    if (likes <= 0) { return; }
+                    botonLike.next().children('span').text(likes - 1);
+                    botonLike.removeClass('dislike').addClass('like');
+              })
+          });
+
+
   }
 
   iniciarSesion();
+  $('#sesion').trigger('click');
   crearUsuario();
     </script>
   </body>

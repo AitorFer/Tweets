@@ -82,7 +82,7 @@
 
 
 
-        var peticion = {url:"http://192.168.100.31:1337/login",
+        var peticion = {url:"http://192.168.100.26:1337/login",
                      type:'POST',
                     data:{username:user, password:pass}
                   };
@@ -103,7 +103,7 @@ function crearUsuario(){
       var password=$('input#password').val();
       var fotoSign=$('input#imagen').val();
 
-      var peticion = {url:"http://192.168.100.31:1337/usuario",
+      var peticion = {url:"http://192.168.100.26:1337/usuario",
                     type:'POST',
                     data:{username:username,
                           password:password,
@@ -132,7 +132,7 @@ function crearUsuario(){
         $('div#registro').hide();
         $('div#app').show();
 
-$.ajax({url:"http://192.168.100.31:1337/tweets",
+$.ajax({url:"http://192.168.100.26:1337/tweets",
         type:'GET',
 
 }).done(function(tweets){
@@ -180,7 +180,7 @@ $.ajax({url:"http://192.168.100.31:1337/tweets",
               //posteamos al servidor nuestro tweet
 
 
-  $.ajax({url:"http://192.168.100.31:1337/tweet",
+  $.ajax({url:"http://192.168.100.26:1337/tweet",
           type:'POST',
           data:{usuario:usuario.id,
                 mensaje: inputPublicar}
@@ -207,7 +207,7 @@ $.ajax({url:"http://192.168.100.31:1337/tweets",
                   console.log('id!', idTweet);
 
 
-          $.ajax({ url:'http://192.168.100.31:1337/like/'+ idTweet,
+          $.ajax({ url:'http://192.168.100.26:1337/like/'+ idTweet,
                   type:'PUT',
                   data:{usuario:usuario.id}
             }).done(function(){
@@ -233,7 +233,7 @@ $.ajax({url:"http://192.168.100.31:1337/tweets",
                           console.log('id!', idTweet);
 
 
-            $.ajax({ url:'http://192.168.100.31:1337/dislike/'+ idTweet,
+            $.ajax({ url:'http://192.168.100.26:1337/dislike/'+ idTweet,
                     type:'PUT',
                     data:{usuario:usuario.id}
               }).done(function(dislike){
